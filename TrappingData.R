@@ -1,35 +1,5 @@
-set.seed(123)
-coords <- data.frame(
-  lon = rnorm(500, mean = -73.95, sd = 0.01),
-  lat = rnorm(500, mean = 40.75, sd = 0.01)
-)
-ggplot(coords, aes(x = lon, y = lat)) +
-  stat_density_2d(aes(fill = ..level..), geom = "polygon", alpha = 0.5, color = NA) +
-  geom_point(color = "black", size = 0.3, alpha = 0.5) +
-  scale_fill_viridis_c(option = "inferno") +
-  coord_fixed() +
-  theme_minimal() +
-  labs(title = "Coordinate Density Map", x = "Longitude", y = "Latitude")
 
 
-
-
-install.packages("leaflet")
-install.packages("leaflet.extras")
-
-library(leaflet)
-library(leaflet.extras)
-leaflet(coords) %>%
-  addTiles() %>%
-  addHeatmap(lng = ~lon, lat = ~lat, radius = 15, blur = 20, max = 0.05, gradient = "YlOrRd")
-
-mice.table<- data.frame(
-  Species = c("Myodes","Apodemus","Microtus")
-)
-mice.table$Species[1]<- data.frame(
-  Species = c("Myodes"),
-  Sample.ID = c("BST1","BST3","BST5","BST10")
-)
 install.packages("palmerpenguins")
 library(tidyverse)
 library(palmerpenguins)
@@ -98,4 +68,19 @@ trapping %>%
   ggplot(aes(x = genus_field, y = ticks)) +
   geom_bar() +
   scale_color_colorblind()
-  
+#Fleas per species
+trapping %>%
+  filter(!is.na(genus_field)) %>%
+  mutate(fleas = replace_na(fleas, 0)) %>%
+  ggplot(aes(x = reorder(genus_field, -fleas), fill = genus_field), y = fleas) +
+  geom_bar() +
+  scale_fill_colorblind()
+#flea average !!! -> count 1 for all?
+trapping %>%
+  filter(!is.na(genus_field)) %>%
+  mutate(fleas = replace_na(fleas, 0)) %>%
+  group_by(genus_field) %>%
+  summarise(mean_fleas = mean(fleas)) %>%
+  ggplot(aes(x = reorder(genus_field, -mean_fleas), fill = genus_field), y = mean_fleas) +
+  geom_bar() +
+  scale_fill_colorblind()
